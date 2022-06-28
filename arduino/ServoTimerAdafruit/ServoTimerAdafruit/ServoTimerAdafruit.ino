@@ -152,16 +152,11 @@ void loop() {
   int pos1;
   int pos2;
   int pos3;
-  BNO::sQuaAnalog_t   sQuat;
-  sQuat = bno.getQua();  
-  Serial.println(sQuat.x);
-  //Serial.println(sQuat.y);
-  //Serial.println(sQuat.z);
-  //Serial.println(sQuat.w);
   
   if(Serial.available()>1)
   {// write sensor position
-
+    BNO::sQuaAnalog_t   sQuat;
+    sQuat = bno.getQua();  
     Serial.print(sQuat.x, 4); 
     Serial.print(","); 
     Serial.print(sQuat.y, 4); 
@@ -170,6 +165,7 @@ void loop() {
     Serial.print(","); 
     Serial.print(sQuat.w, 4); 
     Serial.println(",");
+
     // read motors command
     pos1 = Serial.parseInt();
     pos2 = Serial.parseInt();
