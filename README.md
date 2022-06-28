@@ -1,1 +1,0 @@
-# Tripod_step9

@@ -5,7 +5,7 @@ Step 8: Here we are showing how to setup the inverse control
 import Sofa
 from tutorial import *
 from tripod import Tripod
-from tripodcontroller import DirectController
+from tripodcontroller import DirectController, SerialPortBridgeGeneric
 from closeLoopController import EffectorController, InverseController, CloseLoopController
 
 def EffectorGoal(position):
@@ -100,20 +100,22 @@ def createScene(rootNode):
 
     tripod = scene.Modelling.addChild(Tripod())
 
+    # Serial port bridge
+    serial = SerialPortBridgeGeneric(rootNode)
 
     # Choose here to control position or orientation of end-effector
     orientation = True
     if orientation:
         # inverse in orientation
         goalNode = EffectorGoal([0, 50, 50])
-        targetNode = EffectorGoal([0, 50, 50])
+        referenceNode = EffectorGoal([0, 50, 50])
     else:
         # inverse in position
         goalNode = EffectorGoal([0, 40, 0])
-        targetNode = EffectorGoal([0, 40, 0])
+        referenceNode = EffectorGoal([0, 40, 0])
 
     scene.Modelling.addChild(goalNode)
-    scene.Modelling.addChild(targetNode)
+    scene.Modelling.addChild(referenceNode)
 
     actuators = addInverseComponents(tripod.actuatedarms, tripod.RigidifiedStructure.FreeCenter, goalNode, orientation)
 
@@ -143,5 +145,5 @@ def createScene(rootNode):
                                    skipJ2tKJ2=True,
                                    nodeToParse=tripod["RigidifiedStructure.DeformableParts.MechanicalModel"].getLinkPath())
 
-    rootNode.addObject(EffectorController(scene,targetNode))
-    rootNode.addObject(CloseLoopController(scene,goalNode,targetNode,invCtr))
+    rootNode.addObject(EffectorController(scene,referenceNode))
+    rootNode.addObject(CloseLoopController(scene,goalNode,referenceNode,invCtr))

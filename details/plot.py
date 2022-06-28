@@ -25,13 +25,13 @@ with open("data/results/closeLoop.csv", 'r') as file:
 fig, axs = plt.subplots(2)
 fig.suptitle('Open Loop and Close Loop Behavior')
 
-axs[0].plot(time[100:900], x_close_mesure[100:900],color = 'g',label = 'Close Loop mesure')
-axs[0].plot(time[100:900], x_reference[100:900],color = 'r',label = 'reference')
+axs[0].plot(time, x_close_mesure,color = 'g',label = 'Close Loop mesure')
+axs[0].plot(time, x_reference,color = 'r',label = 'reference')
 axs[0].legend(loc = 'upper left')
 axs[0].set_title('Rotation around x axe')
 
-axs[1].plot(time[100:900], z_close_mesure[100:900],color = 'g',label = 'Close Loop mesure')
-axs[1].plot(time[100:900], z_reference[100:900],color = 'r',label = 'reference')
+axs[1].plot(time, z_close_mesure,color = 'g',label = 'Close Loop mesure')
+axs[1].plot(time, z_reference,color = 'r',label = 'reference')
 axs[1].legend(loc = 'upper left')
 axs[1].set_title('Rotation around z axe')
 
