@@ -16,12 +16,12 @@ class EffectorController(Sofa.Core.Controller):
     def __init__(self, *args, serialport=None, servomotors=None, **kwargs):
         Sofa.Core.Controller.__init__(self, *args, **kwargs)
         self.name = "InverseController"
-        self.targetGoal = args[1]
+        self.referenceNode = args[1]
                 
     def onKeypressedEvent(self, event):
         key = event['key']
 
-        positionRigid = np.array(self.targetGoal.goalMO.position.value)
+        positionRigid = np.array(self.referenceNode.goalMO.position.value)
         position = positionRigid[0][0:3]
         quat = Quat(positionRigid[0][3:7])
         angles = quat.getEulerAngles( axes='sxyz')
@@ -41,80 +41,7 @@ class EffectorController(Sofa.Core.Controller):
             angles[self.index] -= 0.1 
         
         new_quat = Quat.createFromEuler(angles)
-        self.targetGoal.goalMO.position.value = [list(position) +[new_quat.take(0),new_quat.take(1),new_quat.take(2),new_quat.take(3)]]
-
-class OpenLoopController(Sofa.Core.Controller):
-    """The goal of this controller is to :
-       - control the orientation of the goal 
-    """
-
-    def __init__(self, *args, serialport=None, servomotors=None, **kwargs):
-        Sofa.Core.Controller.__init__(self, *args, **kwargs)
-        self.name = "InverseController"
-        self.targetGoal = args[1]
-        self.arduino = args[2]
-
-        self.time = time.time()
-        self.t = [0]
-        self.step = 0
-        self.file = open('openLoop.csv', 'w')
-        writer = csv.writer(self.file)
-        writer.writerow(['time','x_input','x_tracking','z_input','z_tracking'])
-        self.input = []
-        with open("closeLoop.csv", 'r') as file:
-            csvreader = csv.reader(file)
-            header = next(csvreader)
-            for row in csvreader:
-                self.input.append([float(row[1]),float(row[4])])
-
-    def onKeypressedEvent(self, event):
-        key = event['key']
-
-        positionRigid = np.array(self.targetGoal.goalMO.position.value)
-        position = positionRigid[0][0:3]
-        quat = Quat(positionRigid[0][3:7])
-        angles = quat.getEulerAngles( axes='sxyz')
-
-        new_quat = Quat.createFromEuler(angles)
-        self.targetGoal.goalMO.position.value = [list(position) +[new_quat.take(0),new_quat.take(1),new_quat.take(2),new_quat.take(3)]]
-    
-    def onAnimateBeginEvent(self, e):
-        # get time
-        t2 = time.time()
-        self.dt = t2-self.time
-        self.time = t2
-        self.t.append(self.t[-1]+self.dt)
-        
-        if self.arduino.state == "init":
-            return
-
-        if self.arduino.state == "no-comm":
-            return
-
-        # put same orientation as closeLoop
-        if(self.arduino.activate):
-            if self.step < len(self.input):
-                print(self.step)
-                positionRigid = np.array(self.targetGoal.goalMO.position.value)
-                position = positionRigid[0][0:3]
-                quat = Quat(positionRigid[0][3:7])
-                angles = quat.getEulerAngles( axes='sxyz')
-
-                new_quat = Quat.createFromEuler([self.input[self.step][0],angles[1],self.input[self.step][1]])
-                self.targetGoal.goalMO.position.value = [list(position) +[new_quat.take(0),new_quat.take(1),new_quat.take(2),new_quat.take(3)]]
-            
-                # get sensor value
-                self.tracking = self.arduino.sensor
-
-                row = [self.t[-1],self.input[self.step][0],self.tracking[0],self.input[self.step][1],self.tracking[1]]
-                # create the csv writer
-                writer = csv.writer(self.file)
-                writer.writerow(row)
-
-                self.step +=1
-        else :
-            print('Simulation done')
-
+        self.referenceNode.goalMO.position.value = [list(position) +[new_quat.take(0),new_quat.take(1),new_quat.take(2),new_quat.take(3)]]
 
 class CloseLoopController(Sofa.Core.Controller):
     """The goal of this controller it to :
@@ -123,42 +50,39 @@ class CloseLoopController(Sofa.Core.Controller):
         - add an antiwindup
     """
 
-    def __init__(self, *args,dt, serialport=None, servomotors=None, **kwargs):
+    def __init__(self, *args, serialport=None, servomotors=None, **kwargs):
         Sofa.Core.Controller.__init__(self, *args, **kwargs)
         self.name = "InverseController"
         self.nodeGoal = args[1]
-        self.targetGoal = args[2]
+        self.referenceNode = args[2]
         self.arduino = args[3]
 
         # parameters for the Proportionnal controller
         self.time = time.time()
-        # self.dt = dt
+        self.t = [0]
+
+        # controller parameters:
         self.ki = 2
         self.kp = 0.2
-
-        self.t = [0]
-        self.x_output =[0]
-        self.z_output = [0]
-
-        # anti windup parameter:
         self.windupmax = 0.5
         self.kb = 0.98
 
-        self.input = [0,0]
-        self.output = [0,0]
-        self.tracking = [0,0]
+        self.reference = [0,0]
+        self.command = [0,0]
+        self.measure = [0,0]
 
         self.pi_term = [0,0]
 
-        self.file = open('closeLoop.csv', 'w')
+        self.file = open('data/results/closeLoop.csv', 'w')
         writer = csv.writer(self.file)
-        writer.writerow(['time','x_input','x_output','x_tracking','z_input','z_output','z_tracking'])
+        writer.writerow(['time','x_reference','x_command','x_measure','z_reference','z_command','z_measure'])
+
     ########################################
     # Proportionnal controller functions
     ########################################
 
     def proportionnal(self):
-        epsilon = [self.input[i]-self.tracking[i] for i in range(2)]
+        epsilon = [self.reference[i]-self.measure[i] for i in range(2)]
 
         self.proportionnal_term = [epsilon[i]*self.kp for i in range(2)]
 
@@ -166,27 +90,25 @@ class CloseLoopController(Sofa.Core.Controller):
         # saturation
         windup_error = [0,0]
         for i in range(2):
-            if self.output[i] >= self.windupmax:
+            if self.command[i] >= self.windupmax:
                 pi_sat = self.windupmax
-            elif self.output[i] <= -self.windupmax:
+            elif self.command[i] <= -self.windupmax:
                 pi_sat = -self.windupmax
             else :
-                pi_sat = self.output[i]
+                pi_sat = self.command[i]
         
             # anti windup error 
-            windup_error[i] = self.kb*(pi_sat-self.output[i])
+            windup_error[i] = self.kb*(pi_sat-self.command[i])
         
         return windup_error
 
     def integrator(self):
-        epsilon = [self.input[i]-self.tracking[i] for i in range(2)]
-        # print("error : ",epsilon)
+        epsilon = [self.reference[i]-self.measure[i] for i in range(2)]
 
         windup_error = self.antiwindup()
         self.pi_term = [epsilon[i]*self.ki+windup_error[i] for i in range(2)]
-        self.integrator_tem = [self.output[i]+self.pi_term[i]*self.dt for i in range(2)]
-        self.output = [self.proportionnal_term[i] + self.integrator_tem[i] for i in range(2)]
-        # print("output =",self.output)
+        self.integrator_tem = [self.command[i]+self.pi_term[i]*self.dt for i in range(2)]
+        self.command = [self.proportionnal_term[i] + self.integrator_tem[i] for i in range(2)]
 
     ########################################
     # other functions
@@ -201,30 +123,27 @@ class CloseLoopController(Sofa.Core.Controller):
 
         print(f'dt = {self.dt}')
 
-        # get new input
-        q = Quat(self.targetGoal.goalMO.position.value[0][3:7])
+        # get new reference
+        q = Quat(self.referenceNode.goalMO.position.value[0][3:7])
         angles_target = q.getEulerAngles(axes = 'sxyz')
-        self.input = [angles_target[0],angles_target[2]]
+        self.reference = [angles_target[0],angles_target[2]]
 
         # get sensor value
-        self.tracking = self.arduino.sensor
+        self.measure = self.arduino.sensor
 
         # get new ouput value
         self.proportionnal()
         self.integrator()
         
-        # write output in node goal
+        # write command in node goal
         positionRigid = np.array(self.nodeGoal.goalMO.position.value)
         position = positionRigid[0][0:3]
         quat = Quat(positionRigid[0][3:7])
         angles = quat.getEulerAngles( axes='sxyz')
-        new_quat = Quat.createFromEuler([self.output[0],angles[1],self.output[1]])
+        new_quat = Quat.createFromEuler([self.command[0],angles[1],self.command[1]])
         self.nodeGoal.goalMO.position.value = [list(position) +[new_quat.take(0),new_quat.take(1),new_quat.take(2),new_quat.take(3)]]
 
-        self.x_output.append(self.output[0])
-        self.z_output.append(self.output[1])
-
-        row = [self.t[-1],self.input[0],self.output[0],self.tracking[0],self.input[1],self.output[1],self.tracking[1]]
+        row = [self.t[-1],self.reference[0],self.command[0],self.measure[0],self.reference[1],self.command[1],self.measure[1]]
 
         # create the csv writer
         writer = csv.writer(self.file)

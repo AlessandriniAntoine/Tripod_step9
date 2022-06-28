@@ -144,4 +144,4 @@ def createScene(rootNode):
                                    nodeToParse=tripod["RigidifiedStructure.DeformableParts.MechanicalModel"].getLinkPath())
 
     rootNode.addObject(EffectorController(scene,targetNode))
-    rootNode.addObject(CloseLoopController(scene,goalNode,targetNode,invCtr,dt=0.01))
+    rootNode.addObject(CloseLoopController(scene,goalNode,targetNode,invCtr))
