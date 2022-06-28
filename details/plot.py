@@ -28,12 +28,12 @@ fig.suptitle('Open Loop and Close Loop Behavior')
 axs[0].plot(time, x_close_mesure,color = 'g',label = 'Close Loop mesure')
 axs[0].plot(time, x_reference,color = 'r',label = 'reference')
 axs[0].legend(loc = 'upper left')
-axs[0].set_title('Rotation around x axe')
+axs[0].set_title('Rotation around x axis')
 
 axs[1].plot(time, z_close_mesure,color = 'g',label = 'Close Loop mesure')
 axs[1].plot(time, z_reference,color = 'r',label = 'reference')
 axs[1].legend(loc = 'upper left')
-axs[1].set_title('Rotation around z axe')
+axs[1].set_title('Rotation around z axis')
 
 # Set common labels
 axs[1].set_xlabel('time(s)')

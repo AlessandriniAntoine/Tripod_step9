@@ -100,8 +100,6 @@ def createScene(rootNode):
 
     tripod = scene.Modelling.addChild(Tripod())
 
-    # Serial port bridge
-    serial = SerialPortBridgeGeneric(rootNode)
 
     # Choose here to control position or orientation of end-effector
     orientation = True

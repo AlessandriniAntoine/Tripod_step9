@@ -62,16 +62,18 @@ class CloseLoopController(Sofa.Core.Controller):
         self.t = [0]
 
         # controller parameters:
-        self.ki = 2
-        self.kp = 0.2
-        self.windupmax = 0.5
+        # TODO update parameters
+        self.ki = 3
+        self.kp = 0.5
+        self.sat = 0.5
         self.kb = 0.98
 
         self.reference = [0,0]
         self.command = [0,0]
+        self.command_sat = [0,0]
         self.measure = [0,0]
 
-        self.pi_term = [0,0]
+        self.integrator_term = [0,0]
 
         self.file = open('data/results/closeLoop.csv', 'w')
         writer = csv.writer(self.file)
@@ -81,34 +83,26 @@ class CloseLoopController(Sofa.Core.Controller):
     # Proportionnal controller functions
     ########################################
 
-    def proportionnal(self):
+    def controller(self):
+
         epsilon = [self.reference[i]-self.measure[i] for i in range(2)]
+        
+        proportionnal_term = [epsilon[i]*self.kp for i in range(2)]
+        Ki_eps = [epsilon[i]*self.ki for i in range(2)]
+        
+        windup_error = [self.kb*(self.command_sat[i]-self.command[i]) for i in range(2)]
 
-        self.proportionnal_term = [epsilon[i]*self.kp for i in range(2)]
+        self.integrator_term = [self.integrator_term[i]+(Ki_eps[i]+windup_error[i])*self.dt for i in range(2)]
 
-    def antiwindup(self):
-        # saturation
-        windup_error = [0,0]
+        self.command = [proportionnal_term[i] + self.integrator_term[i] for i in range(2)]
+        
         for i in range(2):
-            if self.command[i] >= self.windupmax:
-                pi_sat = self.windupmax
-            elif self.command[i] <= -self.windupmax:
-                pi_sat = -self.windupmax
+            if self.command[i] >= self.sat:
+                self.command_sat[i] = self.sat
+            elif self.command[i] <= -self.sat:
+                self.command_sat[i] = -self.sat
             else :
-                pi_sat = self.command[i]
-        
-            # anti windup error 
-            windup_error[i] = self.kb*(pi_sat-self.command[i])
-        
-        return windup_error
-
-    def integrator(self):
-        epsilon = [self.reference[i]-self.measure[i] for i in range(2)]
-
-        windup_error = self.antiwindup()
-        self.pi_term = [epsilon[i]*self.ki+windup_error[i] for i in range(2)]
-        self.integrator_tem = [self.command[i]+self.pi_term[i]*self.dt for i in range(2)]
-        self.command = [self.proportionnal_term[i] + self.integrator_tem[i] for i in range(2)]
+                self.command_sat[i] = self.command[i]
 
     ########################################
     # other functions
@@ -132,18 +126,18 @@ class CloseLoopController(Sofa.Core.Controller):
         self.measure = self.arduino.sensor
 
         # get new ouput value
-        self.proportionnal()
-        self.integrator()
+        self.controller()
+
         
         # write command in node goal
         positionRigid = np.array(self.nodeGoal.goalMO.position.value)
         position = positionRigid[0][0:3]
         quat = Quat(positionRigid[0][3:7])
         angles = quat.getEulerAngles( axes='sxyz')
-        new_quat = Quat.createFromEuler([self.command[0],angles[1],self.command[1]])
+        new_quat = Quat.createFromEuler([self.command_sat[0],angles[1],self.command_sat[1]])
         self.nodeGoal.goalMO.position.value = [list(position) +[new_quat.take(0),new_quat.take(1),new_quat.take(2),new_quat.take(3)]]
 
-        row = [self.t[-1],self.reference[0],self.command[0],self.measure[0],self.reference[1],self.command[1],self.measure[1]]
+        row = [self.t[-1],self.reference[0],self.command_sat[0],self.measure[0],self.reference[1],self.command_sat[1],self.measure[1]]
 
         # create the csv writer
         writer = csv.writer(self.file)
