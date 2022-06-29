@@ -11,7 +11,7 @@ z_close_command = []
 z_close_mesure = []
 
 conversion = 180/math.pi
-with open("data/results/closeLoop.csv", 'r') as file:
+with open("data/results/closedLoop.csv", 'r') as file:
     csvreader = csv.reader(file)
     header = next(csvreader)
     for row in csvreader:
@@ -25,14 +25,14 @@ with open("data/results/closeLoop.csv", 'r') as file:
 
 
 fig, axs = plt.subplots(2)
-fig.suptitle('Open Loop and Close Loop Behavior')
+fig.suptitle('Closed Loop response')
 
-axs[0].plot(time, x_close_mesure,color = 'g',label = 'Close Loop mesure')
+axs[0].plot(time, x_close_mesure,color = 'g',label = 'Closed Loop mesure')
 axs[0].plot(time, x_reference,color = 'r',label = 'reference')
 axs[0].legend(loc = 'upper left')
 axs[0].set_title('Rotation around x axis')
 
-axs[1].plot(time, z_close_mesure,color = 'g',label = 'Close Loop mesure')
+axs[1].plot(time, z_close_mesure,color = 'g',label = 'Closed Loop mesure')
 axs[1].plot(time, z_reference,color = 'r',label = 'reference')
 axs[1].legend(loc = 'upper left')
 axs[1].set_title('Rotation around z axis')

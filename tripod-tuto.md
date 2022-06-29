@@ -540,7 +540,7 @@ We can now include the maze trajectory withing the tripod robot scene to make a 
 
 # STEP 9 : Closed-Loop Control
 
-We can now include a sensor to get the orientation of the maze.
+We can now include an IMU sensor to get the orientation of the maze.
 Before loading the scene, upload the correct arduino code.
 
 <center>
@@ -550,11 +550,19 @@ Before loading the scene, upload the correct arduino code.
 </figure>
 </center>
 
+We want now to implement the following controller.
+<center>
+<figure>
+  <img src="images/blockDiagram.jpg" alt="" width="300px"/>
+  <figcaption>Figure 13: Block diagram cloded Loop.</figcaption>
+</figure>
+</center>
+
 <pre>
-<a href="arduino/ServoTimerIMU/ServoTimerIMU.ino"> <img src="../../../images/icons/play.png" width="14px"/>Arduino code for IMU.</a>
+<a href="arduino/ServoTimerDFRobot/ServoTimerDFRobot.ino"> <img src="../../../images/icons/play.png" width="14px"/>Arduino code for IMU.</a>
 <a href="arduino/ServoTimerAdafruit/ServoTimerAdafruit.ino"> <img src="../../../images/icons/play.png" width="14px"/>Arduino code for adafruit.</a>
-<a href="details/step9.py"> <img src="../../../images/icons/play.png" width="14px"/>Try the scene in SOFA.</a>
-<a href="myproject/step9.py"> <img src="../../../images/icons/play.png" width="14px"/>Write it yourself.</a>
+<a href="details/closedLoopController.py"> <img src="../../../images/icons/play.png" width="14px"/>Try the scene in SOFA.</a>
+<a href="myproject/closedLoopController.py"> <img src="../../../images/icons/play.png" width="14px"/>Write it yourself.</a>
 
 </pre>
 

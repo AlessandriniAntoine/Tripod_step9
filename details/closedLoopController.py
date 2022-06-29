@@ -63,7 +63,7 @@ class CloseLoopController(Sofa.Core.Controller):
 
         # controller parameters:
         self.ki = 4
-        self.kp = 0.5
+        self.kp = 0.7
         self.sat = 0.7
         self.kb = 0.98
 
