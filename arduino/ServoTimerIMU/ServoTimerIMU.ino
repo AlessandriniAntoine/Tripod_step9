@@ -1,7 +1,9 @@
 
 #include "DFRobot_BNO055.h"
 #include "Wire.h"
-
+ /* #########################################################
+  IMU Sensor info
+   ######################################################### */
 typedef DFRobot_BNO055_IIC    BNO;    // ******** use abbreviations instead of full names ********
 
 BNO   bno(&Wire, 0x28);    // input TwoWire interface and IIC address
@@ -9,15 +11,19 @@ BNO   bno(&Wire, 0x28);    // input TwoWire interface and IIC address
 // show last sensor operate status
 void printLastOperateStatus(BNO::eStatus_t eStatus)
 {
-  switch(eStatus) {
-  case BNO::eStatusOK:    Serial.println("everything ok"); break;
-  case BNO::eStatusErr:   Serial.println("unknow error"); break;
-  case BNO::eStatusErrDeviceNotDetect:    Serial.println("device not detected"); break;
-  case BNO::eStatusErrDeviceReadyTimeOut: Serial.println("device ready time out"); break;
-  case BNO::eStatusErrDeviceStatus:       Serial.println("device internal status error"); break;
-  default: Serial.println("unknow status"); break;
+  switch (eStatus) {
+    case BNO::eStatusOK:    Serial.println("everything ok"); break;
+    case BNO::eStatusErr:   Serial.println("unknow error"); break;
+    case BNO::eStatusErrDeviceNotDetect:    Serial.println("device not detected"); break;
+    case BNO::eStatusErrDeviceReadyTimeOut: Serial.println("device ready time out"); break;
+    case BNO::eStatusErrDeviceStatus:       Serial.println("device internal status error"); break;
+    default: Serial.println("unknow status"); break;
   }
 }
+
+ /* #########################################################
+  Motors info
+   ######################################################### */
 
 #define TIMER1TICK 0.016f
 
@@ -130,7 +136,10 @@ ISR(TIMER2_COMPB_vect) {
 }
 
 
-
+ /* #########################################################
+  setup and loop 
+   ######################################################### */
+   
 void setup() {
   // init motors
   Serial.begin(115200);
@@ -139,7 +148,7 @@ void setup() {
 
   // init sensor
   bno.reset();
-  while(bno.begin() != BNO::eStatusOK) {
+  while (bno.begin() != BNO::eStatusOK) {
     Serial.println("bno begin faild");
     printLastOperateStatus(bno.lastOperateStatus);
     delay(2000);
@@ -152,25 +161,23 @@ void loop() {
   int pos1;
   int pos2;
   int pos3;
-  //BNO::sQuaAnalog_t   sQuat;
-  //sQuat = bno.getQua();  
-  //Serial.println(sQuat.x);
-  //Serial.println(sQuat.y);
-  //Serial.println(sQuat.z);
-  //Serial.println(sQuat.w);
-  
-  if(Serial.available()>1)
-  {// write sensor position
-    BNO::sQuaAnalog_t   sQuat;
-    sQuat = bno.getQua();  
-    Serial.print(sQuat.x, 4); 
-    Serial.print(","); 
-    Serial.print(sQuat.y, 4); 
-    Serial.print(","); 
-    Serial.print(sQuat.z, 4); 
-    Serial.print(","); 
-    Serial.print(sQuat.w, 4); 
+
+  if (Serial.available() > 1)
+  { // write sensor position
+    BNO::sEulAnalog_t   sEul;
+    sEul = bno.getEul();
+    if (sEul.pitch >= 0) {
+      sEul.pitch = 180 - sEul.pitch;
+    }
+    else if (sEul.pitch < 0) {
+      sEul.pitch = -(180 + sEul.pitch);
+    }
+    sEul.roll = -sEul.roll;
+    Serial.print(sEul.roll, 4);
+    Serial.print(",");
+    Serial.print(sEul.pitch, 4);
     Serial.println(",");
+
     // read motors command
     pos1 = Serial.parseInt();
     pos2 = Serial.parseInt();

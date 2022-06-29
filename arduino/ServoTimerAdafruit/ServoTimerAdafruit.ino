@@ -1,23 +1,22 @@
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
 
-#include "DFRobot_BNO055.h"
-#include "Wire.h"
+/* #########################################################
+  IMU Sensor info
+  ######################################################### */
 
-typedef DFRobot_BNO055_IIC    BNO;    // ******** use abbreviations instead of full names ********
+/* Set the delay between fresh samples */
+#define BNO055_SAMPLERATE_DELAY_MS (100)
 
-BNO   bno(&Wire, 0x28);    // input TwoWire interface and IIC address
+// Check I2C device address and correct line below (by default address is 0x29 or 0x28)
+//                                   id, address
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
-// show last sensor operate status
-void printLastOperateStatus(BNO::eStatus_t eStatus)
-{
-  switch(eStatus) {
-  case BNO::eStatusOK:    Serial.println("everything ok"); break;
-  case BNO::eStatusErr:   Serial.println("unknow error"); break;
-  case BNO::eStatusErrDeviceNotDetect:    Serial.println("device not detected"); break;
-  case BNO::eStatusErrDeviceReadyTimeOut: Serial.println("device ready time out"); break;
-  case BNO::eStatusErrDeviceStatus:       Serial.println("device internal status error"); break;
-  default: Serial.println("unknow status"); break;
-  }
-}
+/* #########################################################
+  Motors info
+   ######################################################### */
 
 #define TIMER1TICK 0.016f
 
@@ -130,40 +129,55 @@ ISR(TIMER2_COMPB_vect) {
 }
 
 
+/* #########################################################
+  setup and loop
+  ######################################################### */
 
-void setup() {
-  // init motors
+void setup(void)
+{
   Serial.begin(115200);
   Serial.setTimeout(1);
   SetupServos();
 
-  // init sensor
-  bno.reset();
-  while(bno.begin() != BNO::eStatusOK) {
-    Serial.println("bno begin faild");
-    printLastOperateStatus(bno.lastOperateStatus);
-    delay(2000);
+  Serial.println("Orientation Sensor Test"); Serial.println("");
+  /* Initialise the sensor */
+  if (!bno.begin())
+  {
+    /* There was a problem detecting the BNO055 ... check your connections */
+    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    while (1);
   }
+  delay(1000);
   Serial.println("bno begin success");
+  bno.setExtCrystalUse(true);
+  Wire.setClock(400000);
 }
 
-void loop() {
+
+void loop(void)
+{
   static int value1, value2 = 0;
   int pos1;
   int pos2;
   int pos3;
   
-  if(Serial.available()>1)
-  {// write sensor position
-    BNO::sQuaAnalog_t   sQuat;
-    sQuat = bno.getQua();  
-    Serial.print(sQuat.x, 4); 
-    Serial.print(","); 
-    Serial.print(sQuat.y, 4); 
-    Serial.print(","); 
-    Serial.print(sQuat.z, 4); 
-    Serial.print(","); 
-    Serial.print(sQuat.w, 4); 
+  if (Serial.available() > 1) {
+
+    /* Get a new sensor event */
+    sensors_event_t event;
+    bno.getEvent(&event);
+    event.orientation.y = -event.orientation.y;
+    if (event.orientation.z >= 0) {
+      event.orientation.z = event.orientation.z - 180;
+    }
+    else if (event.orientation.z < 0) {
+      event.orientation.z = 180 + event.orientation.z;
+    }
+
+    /* Display the floating point data */
+    Serial.print(event.orientation.z, 4);
+    Serial.print(",");
+    Serial.print(event.orientation.y, 4);
     Serial.println(",");
 
     // read motors command

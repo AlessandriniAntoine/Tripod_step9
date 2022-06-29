@@ -170,15 +170,8 @@ class InverseController(Sofa.Core.Controller):
         currentLine = self.serialObj.readline()   
         try:
             DecodedAndSplit = currentLine.decode().split(',')
-            FloatValues = []
-            for String in DecodedAndSplit[:4]:
-                FloatValues.append(float(String))
-            anglesIMU = Quat(FloatValues).getEulerAngles()
-            if anglesIMU[0]<0:
-                anglesIMU[0]= anglesIMU[0]+math.pi  
-            else :
-                anglesIMU[0] = anglesIMU[0]-math.pi  
-            self.sensor = [anglesIMU[1],anglesIMU[0]]
+            self.sensor = [float(angle)*math.pi/180 for angle in DecodedAndSplit[:2]]
+            print(f'measure = {self.sensor}')
         except:
             print("Error while decoding/writing IMU data")
 

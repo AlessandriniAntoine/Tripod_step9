@@ -62,10 +62,9 @@ class CloseLoopController(Sofa.Core.Controller):
         self.t = [0]
 
         # controller parameters:
-        # TODO update parameters
-        self.ki = 3
+        self.ki = 4
         self.kp = 0.5
-        self.sat = 0.5
+        self.sat = 0.7
         self.kb = 0.98
 
         self.reference = [0,0]
@@ -86,7 +85,8 @@ class CloseLoopController(Sofa.Core.Controller):
     def controller(self):
 
         epsilon = [self.reference[i]-self.measure[i] for i in range(2)]
-        
+        print(f'error = {epsilon}')
+
         proportionnal_term = [epsilon[i]*self.kp for i in range(2)]
         Ki_eps = [epsilon[i]*self.ki for i in range(2)]
         
@@ -103,7 +103,7 @@ class CloseLoopController(Sofa.Core.Controller):
                 self.command_sat[i] = -self.sat
             else :
                 self.command_sat[i] = self.command[i]
-
+        print(f'command = {self.command_sat}')
     ########################################
     # other functions
     ########################################
@@ -122,6 +122,7 @@ class CloseLoopController(Sofa.Core.Controller):
         angles_target = q.getEulerAngles(axes = 'sxyz')
         self.reference = [angles_target[0],angles_target[2]]
 
+        print(f'reference = {self.reference}')
         # get sensor value
         self.measure = self.arduino.sensor
 
@@ -177,15 +178,8 @@ class InverseController(Sofa.Core.Controller):
         currentLine = self.serialObj.readline()   
         try:
             DecodedAndSplit = currentLine.decode().split(',')
-            FloatValues = []
-            for String in DecodedAndSplit[:4]:
-                FloatValues.append(float(String))
-            anglesIMU = Quat(FloatValues).getEulerAngles()
-            if anglesIMU[0]<0:
-                anglesIMU[0]= anglesIMU[0]+math.pi  
-            else :
-                anglesIMU[0] = anglesIMU[0]-math.pi  
-            self.sensor = [anglesIMU[1],anglesIMU[0]]
+            self.sensor = [float(angle)*math.pi/180 for angle in DecodedAndSplit[:2]]
+            print(f'measure = {self.sensor}')
         except:
             print("Error while decoding/writing IMU data")
 

@@ -554,6 +554,8 @@ Before loading the scene, upload the correct arduino code.
 <a href="arduino/ServoTimerIMU/ServoTimerIMU.ino"> <img src="../../../images/icons/play.png" width="14px"/>Arduino code for IMU.</a>
 <a href="arduino/ServoTimerAdafruit/ServoTimerAdafruit.ino"> <img src="../../../images/icons/play.png" width="14px"/>Arduino code for adafruit.</a>
 <a href="details/step9.py"> <img src="../../../images/icons/play.png" width="14px"/>Try the scene in SOFA.</a>
+<a href="myproject/step9.py"> <img src="../../../images/icons/play.png" width="14px"/>Write it yourself.</a>
+
 </pre>
 
 # Conclusion
