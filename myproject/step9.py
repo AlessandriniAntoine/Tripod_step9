@@ -6,7 +6,7 @@ import Sofa
 from tutorial import *
 from tripod import Tripod
 from tripodcontroller import DirectController, SerialPortBridgeGeneric
-from closeLoopController import EffectorController, InverseController, CloseLoopController
+from closedLoopController import EffectorController, InverseController, CloseLoopController
 
 def EffectorGoal(position):
     self = Sofa.Core.Node('Goal')
