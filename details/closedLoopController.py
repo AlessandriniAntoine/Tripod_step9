@@ -62,8 +62,8 @@ class CloseLoopController(Sofa.Core.Controller):
         self.t = [0]
 
         # controller parameters:
-        self.ki = 4
-        self.kp = 0.7
+        self.ki = 3.5
+        self.kp = 0.6
         self.sat = 0.7
         self.kb = 0.98
 
@@ -74,7 +74,7 @@ class CloseLoopController(Sofa.Core.Controller):
 
         self.integrator_term = [0,0]
 
-        self.file = open('data/results/closeLoop.csv', 'w')
+        self.file = open('data/results/closedLoop.csv', 'w')
         writer = csv.writer(self.file)
         writer.writerow(['time','x_reference','x_command','x_measure','z_reference','z_command','z_measure'])
 
@@ -115,14 +115,14 @@ class CloseLoopController(Sofa.Core.Controller):
         self.time = t2
         self.t.append(self.t[-1]+self.dt)
 
-        print(f'dt = {self.dt}')
+        # print(f'dt = {self.dt}')
 
         # get new reference
         q = Quat(self.referenceNode.goalMO.position.value[0][3:7])
         angles_target = q.getEulerAngles(axes = 'sxyz')
         self.reference = [angles_target[0],angles_target[2]]
 
-        print(f'reference = {self.reference}')
+        # print(f'reference = {self.reference}')
         # get sensor value
         self.measure = self.arduino.sensor
 

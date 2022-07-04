@@ -160,7 +160,7 @@ void loop(void)
   int pos1;
   int pos2;
   int pos3;
-  
+
   if (Serial.available() > 1) {
 
     /* Get a new sensor event */
