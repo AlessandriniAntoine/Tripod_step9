@@ -75,7 +75,7 @@ class CloseLoopController(Sofa.Core.Controller):
 
         self.integrator_term = [0,0]
 
-        self.file = open('data/results/closeLoop.csv', 'w')
+        self.file = open('data/results/closedLoop.csv', 'w')
         writer = csv.writer(self.file)
         writer.writerow(['time','x_reference','x_command','x_measure','z_reference','z_command','z_measure'])
 
