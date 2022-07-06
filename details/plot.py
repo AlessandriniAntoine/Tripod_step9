@@ -15,7 +15,7 @@ with open("data/results/closedLoop.csv", 'r') as file:
     csvreader = csv.reader(file)
     header = next(csvreader)
     for row in csvreader:
-        time.append(float(row[0])*conversion)
+        time.append(float(row[0]))
         x_reference.append(float(row[1])*conversion)
         x_close_command.append(float(row[2])*conversion)
         x_close_mesure.append(float(row[3])*conversion)
