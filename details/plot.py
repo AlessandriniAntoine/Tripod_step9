@@ -27,12 +27,12 @@ with open("data/results/closedLoop.csv", 'r') as file:
 fig, axs = plt.subplots(2)
 fig.suptitle('Closed Loop response')
 
-axs[0].plot(time, x_close_mesure,color = 'g',label = 'Closed Loop mesure')
+axs[0].plot(time, x_close_mesure,color = 'b',label = 'Closed Loop measure')
 axs[0].plot(time, x_reference,color = 'r',label = 'reference')
 axs[0].legend(loc = 'upper left')
 axs[0].set_title('Rotation around x axis')
 
-axs[1].plot(time, z_close_mesure,color = 'g',label = 'Closed Loop mesure')
+axs[1].plot(time, z_close_mesure,color = 'b',label = 'Closed Loop measure')
 axs[1].plot(time, z_reference,color = 'r',label = 'reference')
 axs[1].legend(loc = 'upper left')
 axs[1].set_title('Rotation around z axis')

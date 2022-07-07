@@ -108,7 +108,7 @@ class CloseLoopController(Sofa.Core.Controller):
         self.time = t2
         self.t.append(self.t[-1]+self.dt)
 
-        print(f'dt = {self.dt}')
+        # print(f'dt = {self.dt}')
 
         # get new reference
         q = Quat(self.referenceNode.goalMO.position.value[0][3:7])
@@ -148,7 +148,7 @@ class InverseController(Sofa.Core.Controller):
 
     def __init__(self, *args, **kwargs):
         Sofa.Core.Controller.__init__(self, *args, **kwargs)
-        self.serialObj = serial.Serial("/dev/ttyACM0", 115200,timeout=0.05)
+        self.serialObj = serial.Serial("/dev/ttyACM0", 57600,timeout=0.05)
         self.nodeTripod = args[1]
         self.nodesInverseComponents = args[2]
         self.state = "init"
@@ -171,7 +171,7 @@ class InverseController(Sofa.Core.Controller):
         try:
             DecodedAndSplit = currentLine.decode().split(',')
             self.sensor = [float(angle)*math.pi/180 for angle in DecodedAndSplit[:2]]
-            print(f'measure = {self.sensor}')
+            # print(f'measure = {self.sensor}')
         except:
             print("Error while decoding/writing IMU data")
 
@@ -207,5 +207,5 @@ class InverseController(Sofa.Core.Controller):
         # write to serial port
         String = str(AnglesOut[0]) + ' ' + str(AnglesOut[1]) + ' ' + str(AnglesOut[2]) + '\n'
         ByteString = String.encode('ASCII')
-        print("Sending to the motors: {}".format(ByteString))
+        # print("Sending to the motors: {}".format(ByteString))
         self.serialObj.write(ByteString)

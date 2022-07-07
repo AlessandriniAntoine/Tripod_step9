@@ -82,7 +82,7 @@ ISR(TIMER1_COMPA_vect) {
     bitClear(TCCR1A, COM1A1);
   }
   i++;
-  if (i > 5)
+  if (i > 4)
     i = 0;
 }
 
@@ -96,7 +96,7 @@ ISR(TIMER1_COMPB_vect) {
     bitClear(TCCR1A, COM1B1);
   }
   i++;
-  if (i > 5)
+  if (i > 4)
     i = 0;
 }
 
@@ -110,7 +110,7 @@ ISR(TIMER2_COMPA_vect) {
     bitClear(TCCR2A, COM2A1);
   }
   i++;
-  if (i > 5)
+  if (i > 4)
     i = 0;
 }
 
@@ -135,7 +135,7 @@ ISR(TIMER2_COMPB_vect) {
 
 void setup(void)
 {
-  Serial.begin(115200);
+  Serial.begin(57600);
   Serial.setTimeout(1);
   SetupServos();
 

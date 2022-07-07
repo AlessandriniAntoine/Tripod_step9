@@ -1,0 +1,16 @@
+
+--- NEW SESSION: 07/07/2022 11:33:54 ---
+/Modelling/Tripod/ActuatedArm0/ServoMotor/Articulation/ServoWheel/dofs.velocity = 0 0 0 0 0 0 0 0 0 -0.0212879 0 0
+/Modelling/Tripod/ActuatedArm0/ServoMotor/Articulation/ServoWheel/dofs.force = 0 0 0 0 0 0 -1028.69 -137.649 -792.496 -22226.9 -4246.58 48923.1
+/Modelling/Tripod/ActuatedArm0/ServoMotor/Articulation/ServoWheel/dofs.dforce(V_DERIV) = 0 0 0 0 0 0 -1.17097 2.66179 8.26322 339.119 14.4183 44.1878
+/Modelling/Tripod/ActuatedArm0/ServoMotor/Articulation/ServoWheel/dofs.free_velocity = 0 0 0 0 0 0 0 0 0 -4.39217 0 0
+/Modelling/Tripod/ActuatedArm0/ServoMotor/Articulation/ServoWheel/dofs.showObject = 1
+/Modelling/Tripod/ActuatedArm0/ServoMotor/Articulation/ServoWheel/dofs.showColor = 1 1 1 1
+/Modelling/Tripod/ActuatedArm0/ServoMotor/Articulation/ServoWheel/dofs.10(V_DERIV) = 0 0 0 0 0 0 0 0 0 0.0437088 0 0
+
+--- NEW SESSION: 07/07/2022 14:57:04 ---
+//QP.maxIterations = 248
+//QP.epsilon = 0.01
+//QP.objective = 1.31901
+//QP.epsilon = 0.001
+//QP.objective = 1.23134
